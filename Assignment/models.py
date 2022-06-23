@@ -1,8 +1,12 @@
-from operator import index
+
 from sqlalchemy import  Column,  Integer, String,Float
 from .adressdb import Base
 
-class Address(Base):
+
+# creatiing table for database 
+# Initilizing all the coulmn in database with validation
+
+class Address(Base):  
     __tablename__='addressBook'
     
     id=Column(Integer,primary_key=True,index=True)
