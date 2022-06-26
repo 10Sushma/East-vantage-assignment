@@ -6,7 +6,7 @@ Step of creating python env in windows // you can see the documentation for othe
 
 ```bash
 
-    python -m venv fastapi-env
+    python -m venv tutorial-env
 ```
 
 ```bash
