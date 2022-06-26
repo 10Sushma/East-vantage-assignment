@@ -5,6 +5,17 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends,status,Response, HTTPException
 from .coordinate import getCoordinates
 from geopy.distance import geodesic
+import logging
+
+# Create and configure logger
+logging.basicConfig(filename="newfile.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w')
+# Creating an object
+logger = logging.getLogger()
+ 
+# Setting the threshold of logger to DEBUG
+logger.setLevel(logging.DEBUG)
 
 models.Base.metadata.create_all(engine)
 app=FastAPI()
@@ -22,8 +33,9 @@ app=FastAPI()
 
 #  creating an address from request body 
 @app.post('/postAddress',status_code=status.HTTP_201_CREATED)
+
 def create(request:schemas.Address, db:Session=Depends(get_db)):
- 
+    
     streetAddress=request.streetAddress
     city=request.city
     state=request.state
@@ -47,12 +59,13 @@ def create(request:schemas.Address, db:Session=Depends(get_db)):
     db.add(new_adress) #add that instance object to database session
     db.commit() # commit the changes to the database 
     db.refresh(new_adress)# refresh the instance
+    logger.info(f'New address added to database successfully ')
     return new_adress 
 
 # get all adress
 @app.get('/getAddress',status_code=status.HTTP_200_OK)
 def getAddress( db:Session=Depends(get_db)):
-    
+    logger.info(f'Fetch all addresses from database')
     # get all the address data from  database and return to user 
     allAddress=db.query(models.Address).all()
     return allAddress
@@ -80,13 +93,16 @@ def update(id, request:schemas.Address, db: Session=Depends(get_db)) :
     }
      # updating address through id and query params
     address=db.query(models.Address).filter(models.Address.id==id).update(updateAddress)
-    
+
     #if data not found in database raise the status code and details
     if not address:
+        logger.error(f'Address with id {id} is not avaiable')
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Address with id {id} is not avaiable')
+        
     
-    db.commit()  
-    return address
+    db.commit() 
+    logger.info(f'Address updated successfully ') 
+    return 'Address updated successfully'
 
 # delete addresses
 @app.delete('/deleteAdress/{id}', status_code=status.HTTP_204_NO_CONTENT)
@@ -96,9 +112,11 @@ def destroy(id,db: Session=Depends(get_db)):
     
     #ifdata not found in database raise the status code and details
     if not deletedAdress:
+        logger.error(f'Address with id {id} is not avaiable')
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Address with id {id} is not avaiable')
    
     db.commit()
+    logger.info(f'Adress with {id} deleted successfully ')
     return 'deleted'
 
 # retrieve the addresses that are within a given distance and location coordinates.
@@ -124,6 +142,12 @@ def getNearestAddress(res: Response, streetAddress, city, state, db :Session = D
                 
                 # Here, nearestAddress will hold all the address that between 50km
                 nearestAddress.append(i)
+        if len(nearestAddress)==0:
+            
+            logger.error(f'Address not available within 50km range ')  
+            return 'Address not available within 50km range'  
+        else:        
+            logger.info(f'Nearest address fetched successfully ')
                 
         # # return the nearest address data to user
-        return nearestAddress
+            return nearestAddress
