@@ -1,3 +1,4 @@
+Deployed link: https://eastvantage-react-assignment-et3.pages.dev/
 Before Begin follow the documentation and create an enviornament or you can install all dependencies globally
 
 https://docs.python.org/3/tutorial/venv.html
