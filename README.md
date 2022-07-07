@@ -13,7 +13,7 @@ Step of creating python env in windows // you can see the documentation for othe
 
 ```bash
 
-    fastapi-env/Scripts/activate
+   tutorial-env/Scripts/activate
 
 ```
 
